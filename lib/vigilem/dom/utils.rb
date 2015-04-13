@@ -2,7 +2,6 @@ require 'vigilem/dom/keyboard_event'
 
 module Vigilem
 module DOM
-  # @author jtzero
   # 
   # useful dom mapping methods
   module Utils
@@ -27,12 +26,14 @@ module DOM
                          }
     end
     
-    # @todo   rename dom_location_to_common_str
+    # @todo   deprecate for dom_location_to_common_str
     # @param  [Integer] dom_location_code
     # @return [String]
     def to_dom_location_common_str(dom_location_code)
       (@code_names ||= name_codes.invert.tap {|obj| obj.default = '' })[dom_location_code]
     end
+    
+    alias_method :dom_location_to_common_str, :to_dom_location_common_str
     
     #
     # @param  [String<'L', 'R', 'NUMPAD', 'KP', Object>] location

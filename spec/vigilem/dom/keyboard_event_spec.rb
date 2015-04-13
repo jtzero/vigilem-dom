@@ -58,4 +58,24 @@ describe Vigilem::DOM::KeyboardEvent do
     end
   end
   
+  describe 'SharedKeyboardAndMouseEventInit' do
+    
+    [[:alt_graph, :AltGraph], [:caps_lock, :CapsLock], [:Fn], [:fn_lock, :FnLock], [:Hyper], [:num_lock, :NumLock], 
+      [:OS], [:scroll_lock, :ScrollLock], [:Super], [:Symbol], [:symbol_lock, :SymbolLock]].each do |mod_group|
+        mod_group.each do |mod|
+          it "takes #{[mod].inspect} and returns a Hash with :#{sym = :"keyModifierState#{mod_group.last}"} => true" do
+            expect(described_class.SharedKeyboardAndMouseEventInit([mod])[sym]).to be_truthy
+          end
+        end
+    end
+    [[:alt, :menu, :altKey], [:ctrl, :control, :ctrlKey], [:shift, :shiftKey], [:meta, :metaKey]].each do |mod_group|
+      mod_group.each do |mod|
+        it "takes #{[mod].inspect} and returns a Hash with :#{sym = :"#{mod_group.last}"} => true" do
+          expect(described_class.SharedKeyboardAndMouseEventInit([mod])[sym]).to be_truthy
+        end
+      end
+    end
+    
+  end
+  
 end

@@ -1,6 +1,6 @@
 module W3C
 module DOM3
-# @author jtzero
+# 
 # http://www.w3.org/TR/2014/WD-DOM-Level-3-Events-key-20140612/
 module KeyValues
   SpecialKeyValues = 'Unidentified'

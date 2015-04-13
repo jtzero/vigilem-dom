@@ -1,5 +1,7 @@
 require 'vigilem/support/core_ext'
 
+require 'vigilem/support/utils'
+
 require 'vigilem/dom'
 
 module Vigilem
@@ -44,32 +46,23 @@ module DOM
       @repeat = options[:repeat] ||= false
       @os_specific = self.class.hash_frozen_clone(options[:os_specific] || {})
       
-      @modifier_state = self.class.hash_frozen_clone(options[:modifiers] || options[:modifier_state] || {})
+      mod_state = if (usr_mod = options[:modifiers] || options[:modifier_state])
+                    Support::Utils.deep_dup(usr_mod)
+                  else
+                    {}
+                  end
       
-      mod_dict = self.class.shared_keyboard_and_mouse_event_init(@modifier_state)
+      mod_dict = self.class.shared_keyboard_and_mouse_event_init(mod_state)
       
       super(type, mod_dict.merge(options))
     end
     
-    #---
-    
-    @modifier_attrs = ::W3C::DOM3::KeyboardEvent.instance_variable_get(:@modifer_attrs)
-    
-    @modifier_attrs.each do |method_name|
-      
-      snake_case = method_name.to_s.snakecase.to_sym
-      
-      mod_state_name = "keyModifierState#{method_name}".to_sym
-      define_method(snake_case) do 
-        modifier_state[mod_state_name]
-      end
-    end
-    
-    #---
-    
     @dom_3_attrs = ::W3C::DOM3::KeyboardEvent.instance_variable_get(:@dom_3_attrs) + ::W3C::DOM4::Event.instance_variable_get(:@attrs)
     
-    @dom_3_attrs.each do |method_name|
+    # make ruby-esq versions `alt_key'
+    @attrs = ::W3C::DOM3::KeyboardEvent.instance_variable_get(:@attrs) + ::W3C::DOM4::Event.instance_variable_get(:@attrs)
+    
+    @attrs.each do |method_name|
       
       snake_case = method_name.to_s.snakecase.to_sym
       
@@ -118,6 +111,7 @@ module DOM
       
       # converts a common key to shared_keyboard_and_mouse_event_init_key
       # dom_3 are not prefixed by keyModifierState
+      # @todo   rename to *_member
       # @param  [#to_s] key_name
       # @return [Symbol || NilClass]
       def shared_keyboard_and_mouse_event_init_key(key_name)
@@ -132,7 +126,7 @@ module DOM
       end
       
       # gets the keys for SharedKeyboardAndMouseEventInit 
-      # 
+      # @todo   rename to *_members
       # @return [Array<Symbol>]
       def shared_keyboard_and_mouse_event_init_keys
         shared_keyboard_and_mouse_event_init_keys ||= alternative_key_names.map do |key_grp| 
@@ -144,6 +138,8 @@ module DOM
           end
       end
       
+      # @todo move to new file 
+      # @note for version WD-uievents-20150319 this is renamed to EventModifierInit and KeyboardEventInit
       # converts common names to SharedKeyboardAndMouseEventInit
       # @param  [Hash || Array] hsh_or_ary
       # @return [Hash]
@@ -157,7 +153,7 @@ module DOM
         
         alternative_key_names.each_with_object({}) do |key_grp, out_hash|
           skamei_name = shared_keyboard_and_mouse_event_init_key(key_grp.last)
-          matched_usr_key = hsh.keys.find {|usr_key| usr_key =~ /^(#{key_grp.join('|')})$/i }
+          matched_usr_key = hsh.keys.find {|usr_key| usr_key =~ /^(#{key_grp.join('|')}|#{skamei_name})$/i }
           out_hash[skamei_name] = !!hsh[matched_usr_key]
         end
       end
@@ -169,12 +165,12 @@ module DOM
     # 
     # @return [Hash] 
     def modifier_state
-      @modifier_state ||= Hash[DOM::KeyValues::ModifierKeys.zip([false])].tap {|hsh| hsh.default = false }.freeze
+      @modifier_state ||= Hash[DOM::KeyValues::ModifierKeys.zip([false] * DOM::KeyValues::ModifierKeys.size)].tap {|hsh| hsh.default = false }.freeze
     end
     
    private
     
-    # 
+    # @todo depricate
     # @param  [Hash] hsh_obj
     # @return [Hash] cloned obj
     def self.hash_frozen_clone(hsh_obj)

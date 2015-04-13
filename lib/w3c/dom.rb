@@ -1,4 +1,4 @@
-# http://www.w3.org/TR/DOM-Level-3-Events/
+# http://www.w3.org/TR/2014/WD-DOM-Level-3-Events-20140925/
 module W3C
 module DOM3
 end

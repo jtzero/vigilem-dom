@@ -21,7 +21,7 @@ describe Vigilem::DOM::Utils do
     end
   end
   
-  describe '::to_dom_location_common_str' do
+  shared_examples '::to_dom_location_common_str' do
     it 'converts some common strings to DOM Location Codes' do
       expect(described_class::to_dom_location_common_str(1)).to eql('L')
     end
@@ -29,6 +29,14 @@ describe Vigilem::DOM::Utils do
     it 'defaults to empty String' do
       expect(described_class::to_dom_location_common_str(nil)).to eql('')
     end
+  end
+  
+  describe '::to_dom_location_common_str' do
+    it_behaves_like '::to_dom_location_common_str'
+  end
+  
+  describe '::dom_location_to_common_str' do
+    it_behaves_like '::to_dom_location_common_str'
   end
   
   it 'creates a shortcut constant' do

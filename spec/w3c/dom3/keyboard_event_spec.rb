@@ -6,6 +6,8 @@ require 'w3c/dom3/ui_event'
 
 require 'w3c/dom3/keyboard_event'
 
+require 'w3c/dom3/key_values'
+
 describe W3C::DOM3::KeyboardEvent do
   
   
@@ -39,6 +41,39 @@ describe W3C::DOM3::KeyboardEvent do
     
     it 'returns the status of passed in key name, at the time the event was fired' do
       expect(event.getModifierState('NumLock')).to be_truthy
+    end
+    
+    [:altKey, :keyModifierStateAltGraph, :keyModifierStateCapsLock, :ctrlKey, 
+      :keyModifierStateFn, :keyModifierStateFnLock, :keyModifierStateHyper, :metaKey, 
+      :keyModifierStateNumLock, :keyModifierStateOS, :keyModifierStateScrollLock, 
+      :shiftKey, :keyModifierStateSuper, :keyModifierStateSymbol, 
+                        :keyModifierStateSymbolLock].zip(W3C::DOM3::KeyValues::ModifierKeys - ['Accel']).each do |keid_name, mod_name|
+      it "returns true on `#{mod_name}' when `keyboardEventInitDict[:#{keid_name}] == true' is passed in the constructor" do
+        expect(described_class.new('keydown', keid_name => true).getModifierState(mod_name)).to be_truthy
+      end
+    end
+    
+  end
+  
+  describe 'boolean attribute values' do
+    [:ctrlKey, :shiftKey, :altKey, :metaKey, :repeat, :isComposing].each do |attr_name|
+      describe "##{attr_name}" do
+        it "is truthy when `:#{attr_name}=>true' is passed in to the contructor" do
+          expect(described_class.new('keydown', attr_name => true).public_send(attr_name)).to be_truthy
+        end
+      end
+    end
+    
+    let(:event) do
+      described_class.new('keydown', {:key => 'A', :code => 'KeyA', :location => 1})
+    end
+    
+    {:key => 'A', :code => 'KeyA', :location => 1}.each do |k, v|
+      describe "##{k}" do
+        it 'returns the value passed in on the method by the same name' do
+          expect(event.public_send(k)).to eql(v)
+        end
+      end
     end
     
   end
